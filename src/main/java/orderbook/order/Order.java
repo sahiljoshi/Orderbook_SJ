@@ -1,8 +1,8 @@
-package main.java.orderbook.order;
+package orderbook.order;
 
-import main.java.orderbook.order.OrderState;
-import main.java.orderbook.order.OrderType;
-import main.java.orderbook.security.Security;
+import orderbook.order.OrderState;
+import orderbook.order.OrderType;
+import orderbook.security.Security;
 
 import java.math.BigDecimal;
 

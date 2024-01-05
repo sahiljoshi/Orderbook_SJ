@@ -1,4 +1,4 @@
-package main.java.orderbook.security;
+package orderbook.security;
 
 public class Security {
     private int string ;

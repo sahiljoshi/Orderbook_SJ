@@ -1,4 +1,4 @@
-package main.java.orderbook.order;
+package orderbook.order;
 
 public enum OrderState {
     open,

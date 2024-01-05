@@ -1,6 +1,6 @@
-package main.java.orderbook.order;
+package orderbook.order;
 
-import main.java.orderbook.security.Security;
+import orderbook.security.Security;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
