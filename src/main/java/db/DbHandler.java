@@ -17,15 +17,18 @@ public class DbHandler {
         this.fileName = fileName;
         String url = "jdbc:sqlite:./" + fileName;
         this.url = url;
+        System.out.println("Setting connection");
         try (Connection conn = DriverManager.getConnection(url)) {
             if (conn != null) {
                 DatabaseMetaData meta = conn.getMetaData();
                 System.out.println("The driver name is " + meta.getDriverName());
                 System.out.println("A new database has been created.");
                 conn.setAutoCommit(false);
+                System.out.println("Setting connection");
+                this.conn = conn;
             }
+            System.out.println("Setting connection complete");
 
-            this.conn = conn;
 
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -51,35 +54,32 @@ public class DbHandler {
 
     }
 
-    private Connection connect() {
+    private void connect() {
         try {
             this.conn = DriverManager.getConnection(this.url);
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        return conn;
     }
 
 
     private void InitialzieOrderTable(Connection conn) throws SQLException {
-        String sql = "CREATE TABLE IF NOT EXISTS orders (\n"
-                + "	Id  integer PRIMARY KEY,\n"
-                + "	market  varchar (24) NOT NULL,\n"
-                + "	side  varchar (24) NOT NULL,\n"
-
-                + " order_state  VARCHAR(255) , \n"
-                + "	order_type   VARCHAR(255) ,\n"
-                + "	order_category   VARCHAR(255), \n"
-
-                + "	price DECIMAL(100 , 10 ) , \n"
-                + "	quantity DECIMAL(100 , 10 )  NOT NULL , \n"
-                + "	open_quantity DECIMAL(100 , 10 ) NOT NULL  ,\n"
-                + "	executed_quantity DECIMAL(100 , 10 ) NOT NULL  ,\n"
-
-                + "	parent_order_id int , \n"
-                + "	created_at   time ,  \n"
-                + "	updated_at   time  \n"
-                + ");";
+        String sql = """
+                CREATE TABLE IF NOT EXISTS orders (
+                	Id  integer PRIMARY KEY,
+                	market  varchar (24) NOT NULL,
+                	side  varchar (24) NOT NULL,
+                 order_state  VARCHAR(255) ,\s
+                	order_type   VARCHAR(255) ,
+                	order_category   VARCHAR(255),\s
+                	price DECIMAL(100 , 10 ) ,\s
+                	quantity DECIMAL(100 , 10 )  NOT NULL ,\s
+                	open_quantity DECIMAL(100 , 10 ) NOT NULL  ,
+                	executed_quantity DECIMAL(100 , 10 ) NOT NULL  ,
+                	parent_order_id int ,\s
+                	created_at   time , \s
+                	updated_at   time \s
+                );""";
 
 
         Statement stmt = conn.createStatement();
@@ -100,7 +100,12 @@ public class DbHandler {
         pstmt.setString(3, order.getState().toString());
         pstmt.setString(4, order.getOrderType().toString());
         pstmt.setString(5, order.getCategory().toString());
-        pstmt.setString(6, order.getPrice().toString());
+        if (order.isLimitOrder()) {
+            pstmt.setString(6, order.getPrice().toString());
+        } else {
+            pstmt.setString(6, null);
+        }
+
         pstmt.setDouble(7, order.getQuantity().floatValue());
         ;
         pstmt.setDouble(8, order.getOpenQuantity().floatValue());
@@ -119,6 +124,24 @@ public class DbHandler {
         pst1.close();
 
         order.setOrderID(orderid);
+        return order;
+    }
+
+
+    public Order UpdateOrderToDB(Order order) throws SQLException {
+        String sql = "UPDATE  orders SET   "
+                + "  order_state = ?  ,  " +
+                "  open_quantity = ? , executed_quantity = ? ,  updated_at = ?   " +
+                " WHERE id = ? ";
+        PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        pstmt.setString(1, order.getState().toString());
+        pstmt.setDouble(2, order.getOpenQuantity().floatValue());
+        pstmt.setDouble(3, order.getExecutedQuantity().floatValue());
+        pstmt.setTime(4, Time.valueOf(LocalDateTime.now().toLocalTime()));
+        pstmt.setInt(5, order.getOrderID());
+        this.connect();
+        pstmt.execute();
+        pstmt.close();
         return order;
     }
 

@@ -1,6 +1,7 @@
 package orderbook;
 
 import custom.errors.IllegalOrderState;
+import orderbook.enums.OrderState;
 import orderbook.order.Order;
 
 import java.math.BigDecimal;
@@ -32,14 +33,14 @@ public class OrderPriceList {
     }
 
 
-    public boolean removeOrder(Order o) throws IllegalOrderState {
+    public boolean removeOrder(Order o, OrderState newState) throws IllegalOrderState {
         boolean success = orderList.remove(o);
         if (success) {
             volume = volume.add(o.getOpenQuantity().negate());
             if (volume.compareTo(BigDecimal.ZERO) == -1) {
                 throw new IllegalOrderState();
             }
-
+            o.setState(newState);
         }
         return success;
     }
@@ -51,12 +52,6 @@ public class OrderPriceList {
     }
 
 
-    public void UpdateExecutedQty(Order o) {
-        System.out.println("Order Price list : addOrder " + o.toStringPartial());
-        orderList.add(o);
-        volume = volume.add(o.getOpenQuantity());
-    }
-
     public void updateExecutedQty(BigDecimal qty, int orderID, int index) {
         Order order = orderList.get(index);
         if (order.getOrderID() != orderID) {
@@ -64,6 +59,9 @@ public class OrderPriceList {
             System.exit(-1);
         }
         order.updateExecutedQty(qty);
+        if (order.getState() == OrderState.EXECUTED) {
+            orderList.remove(index);
+        }
         System.out.println("Order Price list : update qty  " + order.toString());
         volume = volume.add(qty.negate());
     }

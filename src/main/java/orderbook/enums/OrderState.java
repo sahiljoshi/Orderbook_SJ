@@ -1,10 +1,10 @@
 package orderbook.enums;
 
 public enum OrderState {
-    open,
-    wait,
-    executed,
-    cancelled,
-    triggered,
-
+    OPEN,
+    WAIT, // for ICEBERG ORDERS
+    EXECUTED,
+    CANCELLED,
+    Expired,
+    TRIGGERED, // For bracket orders
 }

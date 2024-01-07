@@ -30,7 +30,7 @@ public class Order {
         this.security = security;
         this.price = price;
         this.quantity = quantity;
-        this.state = OrderState.open;
+        this.state = OrderState.OPEN;
         this.parentOrderID = 0;
         this.orderSide = side;
     }
@@ -40,15 +40,13 @@ public class Order {
         this.security = security;
         this.price = price;
         this.quantity = quantity;
-        this.state = OrderState.open;
+        this.state = OrderState.OPEN;
         this.parentOrderID = parentOrderID;
         this.orderSide = side;
         this.category = OrderCategory.Normal;
     }
 
 
-    // for DTO converion at DB level..
-    // make private
     public Order(Security security, OrderType orderType, BigDecimal price, BigDecimal quantity, OrderSide orderSide, OrderState state, OrderCategory category) {
 
         this.orderType = orderType;
@@ -131,6 +129,9 @@ public class Order {
     public void updateExecutedQty(BigDecimal qty) {
         this.setOpenQuantity(openQuantity.add(qty.negate()));
         this.setExecutedQuantity(executedQuantity.add(qty));
+        if (openQuantity.compareTo(BigDecimal.ZERO) < 1) {
+            this.setState(OrderState.EXECUTED);
+        }
 
     }
 
@@ -163,5 +164,9 @@ public class Order {
 
     public void setOrderID(int orderID) {
         this.orderID = orderID;
+    }
+
+    public void setState(OrderState newState) {
+        this.state = newState;
     }
 }

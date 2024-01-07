@@ -1,6 +1,7 @@
 package orderbook;
 
 import custom.errors.IllegalOrderState;
+import orderbook.enums.OrderState;
 import orderbook.order.Order;
 
 import java.math.BigDecimal;
@@ -111,17 +112,25 @@ public class OrderSideBook {
         }
     }
 
-    public void updateExecutedOrderQty(BigDecimal qty, int orderID, int index) {
+    public void updateExecutedOrderQty(BigDecimal qty, int orderID, int index, boolean isFull) {
         Order order = this.orderMap.get(orderID);
         BigDecimal originalVol = order.getOpenQuantity();
         OrderPriceList orderList = priceOrderTree.get(order.getPrice());
 
         orderList.updateExecutedQty(qty, orderID, index);
+        if (isFull) {
+            orderMap.remove(orderID);
+            this.totalOrderCount--;
+        }
+        if (orderList.getOrdersCount() == 0) {
+            removePrice(order.getPrice());
+        }
+
 //        this.volume += (order.getQuantity() - originalVol);
     }
 
     // this is to be adjusted to manage
-    public boolean removeOrderByID(int id) throws IllegalOrderState {
+    public boolean removeOrderByID(int id, OrderState newState) throws IllegalOrderState {
         this.totalOrderCount -= 1;
         Order order = orderMap.get(id);
         if (order == null) {
@@ -134,15 +143,23 @@ public class OrderSideBook {
             _logger.log(Level.WARNING, "Order count is zero for the price.Cant remove order ");
             return false;
         }
-        boolean result = orders.removeOrder(order);
+        boolean result = orders.removeOrder(order, newState);
         if (orders.getOrdersCount() == 0) {
             removePrice(order.getPrice());
         }
         this.orderMap.remove(id);
+
         return result;
     }
 
     public BigDecimal getQtyForPrice(BigDecimal price) {
         return this.priceOrderTree.get(price).getVolume();
+    }
+
+    public Order getOrderDetails(Order o) {
+        if (orderExists(o.getOrderID())) {
+            return orderMap.get(o.getOrderID());
+        }
+        return null;
     }
 }

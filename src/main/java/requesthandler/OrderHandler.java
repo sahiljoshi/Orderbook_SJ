@@ -44,7 +44,6 @@ public class OrderHandler {
         OrderResponse or = orderBook.processOrder(o);
         inserOrderResponseTODb(or);
         return o.getOrderID();
-
     }
 
     public boolean removeOrder(Order o) {
@@ -60,9 +59,9 @@ public class OrderHandler {
     }
 
     private void inserOrderResponseTODb(OrderResponse orderResponse) {
-        // this will insert order to  DB
-        // and update  order Id  in the order object
         orderResponse.trades.stream().forEach(this::InsertTradeToDB);
+        orderResponse.matchedOrders.stream().forEach(this::UpdateOrderInDB);
+        this.UpdateOrderInDB(orderResponse.order);
     }
 
     private void inserOrderTODb(Order order) throws SQLException {
@@ -71,8 +70,12 @@ public class OrderHandler {
 
 
     private void UpdateOrderInDB(Order o) {
-        // this will insert order to  DB
-        // and update  order Id  in the order object
+        try {
+            this.dbHandler.UpdateOrderToDB(o);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(-101);
+        }
     }
 
 
@@ -89,6 +92,12 @@ public class OrderHandler {
     public Map<String, String> GetOrderBookDetails(Security sec) {
         OrderBook orderBook = SecurityOrderBook.get(sec.getMarketPair());
         return orderBook.getBookDetails();
+
+    }
+
+    public Order getOrderDetails(Order o) {
+        OrderBook orderBook = SecurityOrderBook.get(o.getSecurity().getMarketPair());
+        return orderBook.getOrderDetails(o);
 
     }
 }

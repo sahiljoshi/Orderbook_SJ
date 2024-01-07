@@ -1,6 +1,7 @@
 package orderbook;
 
 import custom.errors.IllegalOrderState;
+import orderbook.enums.OrderState;
 import orderbook.order.Order;
 import orderbook.enums.OrderSide;
 import orderbook.security.Security;
@@ -31,15 +32,11 @@ public class OrderBook {
     }
 
 
-    public void addOrder(Order o) {
-
-    }
-
     public boolean removeOrder(Order o) throws IllegalOrderState {
         if (o.getOrderSide() == OrderSide.BuySide) {
-            return this.bidBook.removeOrderByID(o.getOrderID());
+            return this.bidBook.removeOrderByID(o.getOrderID(), OrderState.CANCELLED);
         } else {
-            return this.askBook.removeOrderByID(o.getOrderID());
+            return this.askBook.removeOrderByID(o.getOrderID(), OrderState.CANCELLED);
         }
     }
 
@@ -84,7 +81,7 @@ public class OrderBook {
         return false;
     }
 
-    private BigDecimal processOrderList(ArrayList<Trade> trades, OrderPriceList orders,
+    private BigDecimal processOrderList(ArrayList<Trade> trades, ArrayList<Order> matchedOrders, OrderPriceList orders,
                                         BigDecimal qtyRemaining, Order incomingOrder
     ) throws IllegalOrderState {
         OrderSide side = incomingOrder.getOrderSide();
@@ -93,6 +90,7 @@ public class OrderBook {
         int currentIndex = 0;
         boolean isBuyerTaker = false;
         long time = System.currentTimeMillis();
+        System.out.println("processOrderList condition" + (orders.getOrdersCount() > 0) + " + cond 3 " + (isRemaingQty(qtyRemaining)));
         while ((orders.getOrdersCount() > 0) && (isRemaingQty(qtyRemaining))) {
             BigDecimal qtyTraded = BigDecimal.ZERO;
             Order bookOrder = orders.getOrderByPosition(currentIndex);
@@ -100,18 +98,23 @@ public class OrderBook {
                 qtyTraded = qtyRemaining;
                 if (side == OrderSide.SellSide) {
                     this.bidBook.updateExecutedOrderQty(qtyTraded,
-                            bookOrder.getOrderID(), currentIndex);
+                            bookOrder.getOrderID(), currentIndex, false);
                 } else {
                     this.askBook.updateExecutedOrderQty(qtyTraded,
-                            bookOrder.getOrderID(), currentIndex);
+                            bookOrder.getOrderID(), currentIndex, false);
                 }
                 qtyRemaining = BigDecimal.ZERO;
+
+                incomingOrder.setState(OrderState.EXECUTED);
             } else {
-                qtyTraded = bookOrder.getQuantity();
+                qtyTraded = bookOrder.getOpenQuantity();
                 if (side == OrderSide.SellSide) {
-                    this.bidBook.removeOrderByID(bookOrder.getOrderID());
+                    this.bidBook.updateExecutedOrderQty(qtyTraded,
+                            bookOrder.getOrderID(), currentIndex, true);
+
                 } else {
-                    this.askBook.removeOrderByID(bookOrder.getOrderID());
+                    this.askBook.updateExecutedOrderQty(qtyTraded,
+                            bookOrder.getOrderID(), currentIndex, true);
                 }
                 qtyRemaining = qtyRemaining.add(qtyTraded.negate());
             }
@@ -124,10 +127,11 @@ public class OrderBook {
                 seller = bookOrder;
                 isBuyerTaker = true;
             }
+            incomingOrder.updateExecutedQty(qtyTraded);
             Trade trade = new Trade(buyer, seller, bookOrder.getPrice(), qtyTraded, isBuyerTaker, time);
+            matchedOrders.add(bookOrder);
             trades.add(trade);
             System.out.println(trade);
-
         }
         return qtyRemaining;
     }
@@ -135,27 +139,36 @@ public class OrderBook {
 
     private OrderResponse processMarketOrder(Order incomingOrder) throws IllegalOrderState {
         ArrayList<Trade> trades = new ArrayList<Trade>();
+        ArrayList<Order> matchedOrders = new ArrayList<Order>();
+
         OrderSide side = incomingOrder.getOrderSide();
         BigDecimal remainingQty = incomingOrder.getQuantity();
         if (side == OrderSide.BuySide) {
+            System.out.println("processMarketOrder buy side");
             this.lastTradeSide = 1;
+            System.out.println("process Market order buy condition" + isRemaingQty(remainingQty) + " , " + (this.askBook.getOpenOrderCount() > 0));
             while (isRemaingQty(remainingQty) && (this.askBook.getOpenOrderCount() > 0)) {
+                System.out.println("processMarketOrder buy side: while loop");
                 OrderPriceList ordersAtBest = this.askBook.minPriceList();
-                remainingQty = processOrderList(trades, ordersAtBest, remainingQty,
+                remainingQty = processOrderList(trades, matchedOrders, ordersAtBest, remainingQty,
                         incomingOrder);
             }
         } else if (side == OrderSide.SellSide) {
             this.lastTradeSide = -1;
             while (isRemaingQty(remainingQty) && (this.bidBook.getOpenOrderCount() > 0)) {
+                System.out.println("processMarketOrder sell side: while loop");
                 OrderPriceList ordersAtBest = this.bidBook.maxPriceList();
-                remainingQty = processOrderList(trades, ordersAtBest, remainingQty,
+                remainingQty = processOrderList(trades, matchedOrders, ordersAtBest, remainingQty,
                         incomingOrder);
             }
         } else {
             throw new IllegalArgumentException("order neither market nor limit: " +
                     side);
         }
-        OrderResponse report = new OrderResponse(trades, incomingOrder, true);
+        if (isRemaingQty(remainingQty)) {
+            incomingOrder.setState(OrderState.CANCELLED);
+        }
+        OrderResponse report = new OrderResponse(trades, matchedOrders, incomingOrder, true);
         return report;
     }
 
@@ -163,6 +176,8 @@ public class OrderBook {
     private OrderResponse processLimitOrder(Order incomingOrder) throws IllegalOrderState {
         boolean orderInBook = false;
         ArrayList<Trade> trades = new ArrayList<Trade>();
+        ArrayList<Order> matchedOrders = new ArrayList<Order>();
+
         OrderSide side = incomingOrder.getOrderSide();
         BigDecimal qtyRemaining = incomingOrder.getQuantity();
         BigDecimal price = incomingOrder.getPrice();
@@ -174,7 +189,7 @@ public class OrderBook {
                     isRemaingQty(qtyRemaining) &&
                     price.compareTo(askBook.bestAsk()) >= 0) {
                 OrderPriceList ordersAtBest = askBook.minPriceList();
-                qtyRemaining = processOrderList(trades, ordersAtBest, qtyRemaining,
+                qtyRemaining = processOrderList(trades, matchedOrders, ordersAtBest, qtyRemaining,
                         incomingOrder);
             }
             // If volume remains, add order to book
@@ -192,7 +207,7 @@ public class OrderBook {
                     isRemaingQty(qtyRemaining) &&
                     price.compareTo(bidBook.bestBid()) <= 0) {
                 OrderPriceList ordersAtBest = bidBook.maxPriceList();
-                qtyRemaining = processOrderList(trades, ordersAtBest, qtyRemaining,
+                qtyRemaining = processOrderList(trades, matchedOrders, ordersAtBest, qtyRemaining,
                         incomingOrder);
             }
             // If volume remains, add to book
@@ -209,7 +224,7 @@ public class OrderBook {
             throw new IllegalArgumentException("order neither market nor limit: " +
                     side);
         }
-        OrderResponse report = new OrderResponse(trades, incomingOrder, true);
+        OrderResponse report = new OrderResponse(trades, matchedOrders, incomingOrder, true);
 
         return report;
     }
@@ -228,5 +243,14 @@ public class OrderBook {
         }
 
         return hashMap;
+    }
+
+    public Order getOrderDetails(Order o) {
+        if (o.getOrderSide() == OrderSide.BuySide) {
+            return this.bidBook.getOrderDetails(o);
+        } else {
+            return this.askBook.getOrderDetails(o);
+        }
+
     }
 }
