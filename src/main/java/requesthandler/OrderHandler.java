@@ -3,14 +3,13 @@ package requesthandler;
 import custom.errors.IllegalOrderState;
 import db.DbHandler;
 import orderbook.OrderBook;
-import orderbook.OrderResponse;
+import orderbook.OrderReceipt;
 import orderbook.Trade;
 import orderbook.order.Order;
 import orderbook.security.Security;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
@@ -41,7 +40,7 @@ public class OrderHandler {
             System.exit(-101);
         }
         OrderBook orderBook = SecurityOrderBook.get(o.getSecurity().getMarketPair());
-        OrderResponse or = orderBook.processOrder(o);
+        OrderReceipt or = orderBook.processOrder(o);
         inserOrderResponseTODb(or);
         return o.getOrderID();
     }
@@ -58,7 +57,7 @@ public class OrderHandler {
 
     }
 
-    private void inserOrderResponseTODb(OrderResponse orderResponse) {
+    private void inserOrderResponseTODb(OrderReceipt orderResponse) {
         orderResponse.trades.stream().forEach(this::InsertTradeToDB);
         orderResponse.matchedOrders.stream().forEach(this::UpdateOrderInDB);
         this.UpdateOrderInDB(orderResponse.order);

@@ -5,6 +5,6 @@ public enum OrderState {
     WAIT, // for ICEBERG ORDERS
     EXECUTED,
     CANCELLED,
-    Expired,
+    EXPIRED,
     TRIGGERED, // For bracket orders
 }

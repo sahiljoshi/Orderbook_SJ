@@ -41,9 +41,9 @@ public class OrderBook {
     }
 
 
-    public OrderResponse processOrder(Order order) {
+    public OrderReceipt processOrder(Order order) {
         boolean isLimit = order.isLimitOrder();
-        OrderResponse oReport = new OrderResponse();
+        OrderReceipt oReport = new OrderReceipt();
         // Update time
         //this.time = order.getTimestamp();
         if (order.getQuantity().doubleValue() < 1E-6) {
@@ -137,7 +137,7 @@ public class OrderBook {
     }
 
 
-    private OrderResponse processMarketOrder(Order incomingOrder) throws IllegalOrderState {
+    private OrderReceipt processMarketOrder(Order incomingOrder) throws IllegalOrderState {
         ArrayList<Trade> trades = new ArrayList<Trade>();
         ArrayList<Order> matchedOrders = new ArrayList<Order>();
 
@@ -166,14 +166,14 @@ public class OrderBook {
                     side);
         }
         if (isRemaingQty(remainingQty)) {
-            incomingOrder.setState(OrderState.CANCELLED);
+            incomingOrder.setState(OrderState.EXPIRED);
         }
-        OrderResponse report = new OrderResponse(trades, matchedOrders, incomingOrder, true);
+        OrderReceipt report = new OrderReceipt(trades, matchedOrders, incomingOrder, true);
         return report;
     }
 
 
-    private OrderResponse processLimitOrder(Order incomingOrder) throws IllegalOrderState {
+    private OrderReceipt processLimitOrder(Order incomingOrder) throws IllegalOrderState {
         boolean orderInBook = false;
         ArrayList<Trade> trades = new ArrayList<Trade>();
         ArrayList<Order> matchedOrders = new ArrayList<Order>();
@@ -224,7 +224,7 @@ public class OrderBook {
             throw new IllegalArgumentException("order neither market nor limit: " +
                     side);
         }
-        OrderResponse report = new OrderResponse(trades, matchedOrders, incomingOrder, true);
+        OrderReceipt report = new OrderReceipt(trades, matchedOrders, incomingOrder, true);
 
         return report;
     }
