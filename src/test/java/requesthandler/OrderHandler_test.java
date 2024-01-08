@@ -1,7 +1,6 @@
 package requesthandler;
 
 import db.DbHandler;
-import orderbook.OrderResponse;
 import orderbook.enums.OrderCategory;
 import orderbook.enums.OrderSide;
 import orderbook.enums.OrderState;
