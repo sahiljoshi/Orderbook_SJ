@@ -580,8 +580,7 @@ public class orderbook_test {
         assertEquals(TestName + "trade2 buyOrder ID    ", 2, or.trades.get(1).getBuyOrder().getOrderID());
         assertEquals(TestName + "trade2 sellOrder ID    ", 3, or.trades.get(1).getSellOrder().getOrderID());
         assertEquals(TestName + "trade2 price   ", price2, or.trades.get(1).getExecutionPrice());
-
-
+        
         Map<String, String> orderBookdDetails = book.getBookDetails();
         assertEquals(TestName + " Bid price ", "99.02", orderBookdDetails.get(BID_PRICE));
         assertEquals(TestName + " ask price ", null, orderBookdDetails.get(ASK_PRICE));

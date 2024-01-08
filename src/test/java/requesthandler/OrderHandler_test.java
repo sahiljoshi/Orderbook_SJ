@@ -20,6 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 public class OrderHandler_test {
 
+    
     private OrderHandler handler;
     Security security;
     Security security2;
