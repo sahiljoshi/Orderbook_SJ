@@ -18,8 +18,8 @@ public class IceBergOrder extends Order {
     private int percentageIncrement;
     private ArrayList<Order> childOrders;
 
-    public IceBergOrder(OrderType orderType, Security security, BigDecimal price, BigDecimal quantity, int percentageIncrement, OrderSide side) {
-        super(security, orderType, price, quantity, side);
+    public IceBergOrder(OrderType orderType, Security security, BigDecimal price, BigDecimal quantity, int percentageIncrement, OrderSide side, int account_id) {
+        super(security, orderType, price, quantity, side, account_id);
         this.percentageIncrement = percentageIncrement;
         this.category = OrderCategory.IceBergOrder;
         childOrders = new ArrayList<>();

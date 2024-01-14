@@ -69,6 +69,7 @@ public class DbHandler {
                 	Id  integer PRIMARY KEY,
                 	market  varchar (24) NOT NULL,
                 	side  varchar (24) NOT NULL,
+                	account integer NOT NULL ,  
                  order_state  VARCHAR(255) ,\s
                 	order_type   VARCHAR(255) ,
                 	order_category   VARCHAR(255),\s
@@ -90,13 +91,15 @@ public class DbHandler {
 
     public Order insertOrderToDB(Order order) throws SQLException {
         String sql = "INSERT INTO orders ( "
-                + "market  ,side , order_state , order_type , order_category , price, " +
+                + "market  ,side , account ,  order_state , order_type , order_category , price, " +
                 " quantity, open_quantity, executed_quantity, parent_order_id, created_at, updated_at ) " +
                 "VALUES( ? , ? , ? , ? , ? , ?," +
-                " ? , ? , ? , ? , ? , ? )";
+                " ? , ? , ? , ? , ? , ? , ?  )";
         PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         pstmt.setString(1, order.getSecurity().getMarketPair());
         pstmt.setString(2, order.getOrderSide().toString());
+        pstmt.setInt(2, order.getAccount());
+
         pstmt.setString(3, order.getState().toString());
         pstmt.setString(4, order.getOrderType().toString());
         pstmt.setString(5, order.getCategory().toString());

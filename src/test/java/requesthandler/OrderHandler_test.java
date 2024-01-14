@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 public class OrderHandler_test {
 
-    
+
     private OrderHandler handler;
     Security security;
     Security security2;
@@ -55,7 +55,7 @@ public class OrderHandler_test {
         BigDecimal price = new BigDecimal("100.02");
         BigDecimal qty = new BigDecimal("1.01");
         OrderSide side = OrderSide.BuySide;
-        Order secOrder = new Order(security, OrderType.LimitOrder, price, qty, side, OrderState.OPEN, OrderCategory.Normal);
+        Order secOrder = new Order(security, OrderType.LimitOrder, price, qty, side, OrderState.OPEN, OrderCategory.Normal, 1);
         handler.AddOrder(secOrder);
         Map<String, String> details = handler.GetOrderBookDetails(security);
         assertEquals("Singe buy Order  Test", price.toString(), details.get(BID_PRICE));
@@ -70,7 +70,7 @@ public class OrderHandler_test {
         BigDecimal price = new BigDecimal("100.02");
         BigDecimal qty = new BigDecimal("1.01");
         OrderSide side = OrderSide.BuySide;
-        Order secOrder = new Order(security, OrderType.MarketOrder, null, qty, side, OrderState.OPEN, OrderCategory.Normal);
+        Order secOrder = new Order(security, OrderType.MarketOrder, null, qty, side, OrderState.OPEN, OrderCategory.Normal, 1);
         handler.AddOrder(secOrder);
         Map<String, String> details = handler.GetOrderBookDetails(security);
         assertEquals("Singe buy Order  Test", null, details.get(BID_PRICE));
@@ -87,12 +87,12 @@ public class OrderHandler_test {
 
         BigDecimal price = new BigDecimal("100.02");
         BigDecimal qty = new BigDecimal("1.01");
-        Order secOrder = new Order(security, OrderType.LimitOrder, price, qty, side, OrderState.OPEN, OrderCategory.Normal);
+        Order secOrder = new Order(security, OrderType.LimitOrder, price, qty, side, OrderState.OPEN, OrderCategory.Normal, 1);
         handler.AddOrder(secOrder);
 
         BigDecimal price2 = new BigDecimal("1000.02");
         BigDecimal qty2 = new BigDecimal("1.2");
-        Order secOrder2 = new Order(security2, OrderType.LimitOrder, price2, qty2, side, OrderState.OPEN, OrderCategory.Normal);
+        Order secOrder2 = new Order(security2, OrderType.LimitOrder, price2, qty2, side, OrderState.OPEN, OrderCategory.Normal, 2);
         handler.AddOrder(secOrder2);
 
         Map<String, String> details = handler.GetOrderBookDetails(security);
@@ -109,13 +109,13 @@ public class OrderHandler_test {
         BigDecimal price = new BigDecimal("100.02");
         BigDecimal qty = new BigDecimal("1.01");
         OrderSide side = OrderSide.BuySide;
-        Order secOrder = new Order(security, OrderType.LimitOrder, price, qty, side, OrderState.OPEN, OrderCategory.Normal);
+        Order secOrder = new Order(security, OrderType.LimitOrder, price, qty, side, OrderState.OPEN, OrderCategory.Normal, 1);
         handler.AddOrder(secOrder);
         Map<String, String> details = handler.GetOrderBookDetails(security);
         assertEquals("verifySimpleMatch", price.toString(), details.get(BID_PRICE));
         assertEquals("Singe buy Order  Test", qty.toString(), details.get(BID_QTY));
         //SellOrder
-        Order secOrder_sell = new Order(security, OrderType.LimitOrder, price, qty, OrderSide.SellSide, OrderState.OPEN, OrderCategory.Normal);
+        Order secOrder_sell = new Order(security, OrderType.LimitOrder, price, qty, OrderSide.SellSide, OrderState.OPEN, OrderCategory.Normal, 2);
         int sell_order_id = handler.AddOrder(secOrder_sell);
         details = handler.GetOrderBookDetails(security);
         assertEquals("verifySimpleMatch", null, details.get(BID_PRICE));
@@ -129,13 +129,13 @@ public class OrderHandler_test {
         BigDecimal price = new BigDecimal("100.02");
         BigDecimal qty = new BigDecimal("1.01");
         OrderSide side = OrderSide.BuySide;
-        Order secOrder = new Order(security, OrderType.LimitOrder, price, qty, side, OrderState.OPEN, OrderCategory.Normal);
+        Order secOrder = new Order(security, OrderType.LimitOrder, price, qty, side, OrderState.OPEN, OrderCategory.Normal, 1);
         handler.AddOrder(secOrder);
         Map<String, String> details = handler.GetOrderBookDetails(security);
         assertEquals("verifySimpleMatch", price.toString(), details.get(BID_PRICE));
         assertEquals("Singe buy Order  Test", qty.toString(), details.get(BID_QTY));
         //SellOrder
-        Order secOrder_sell = new Order(security, OrderType.MarketOrder, null, qty, OrderSide.SellSide, OrderState.OPEN, OrderCategory.Normal);
+        Order secOrder_sell = new Order(security, OrderType.MarketOrder, null, qty, OrderSide.SellSide, OrderState.OPEN, OrderCategory.Normal, 2);
         int sell_order_id = handler.AddOrder(secOrder_sell);
         details = handler.GetOrderBookDetails(security);
         assertEquals("verifySimpleMatch", null, details.get(BID_PRICE));

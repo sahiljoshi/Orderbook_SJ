@@ -21,11 +21,12 @@ public class Order {
     private BigDecimal openQuantity;
     private BigDecimal executedQuantity;
     private final int parentOrderID;
+    private final int account_id;
 
     final OrderSide orderSide;
 
 
-    public Order(Security security, OrderType orderType, BigDecimal price, BigDecimal quantity, OrderSide side) {
+    public Order(Security security, OrderType orderType, BigDecimal price, BigDecimal quantity, OrderSide side, int account_id) {
         this.orderType = orderType;
         this.security = security;
         this.price = price;
@@ -33,9 +34,10 @@ public class Order {
         this.state = OrderState.OPEN;
         this.parentOrderID = 0;
         this.orderSide = side;
+        this.account_id = account_id;
     }
 
-    private Order(OrderType orderType, Security security, BigDecimal price, BigDecimal quantity, OrderSide side, int parentOrderID) {
+    private Order(OrderType orderType, Security security, BigDecimal price, BigDecimal quantity, OrderSide side, int parentOrderID, int account_id) {
         this.orderType = orderType;
         this.security = security;
         this.price = price;
@@ -44,10 +46,11 @@ public class Order {
         this.parentOrderID = parentOrderID;
         this.orderSide = side;
         this.category = OrderCategory.Normal;
+        this.account_id = account_id;
     }
 
 
-    public Order(Security security, OrderType orderType, BigDecimal price, BigDecimal quantity, OrderSide orderSide, OrderState state, OrderCategory category) {
+    public Order(Security security, OrderType orderType, BigDecimal price, BigDecimal quantity, OrderSide orderSide, OrderState state, OrderCategory category, int account_id) {
 
         this.orderType = orderType;
         this.security = security;
@@ -59,11 +62,12 @@ public class Order {
         this.parentOrderID = 0;
         this.orderSide = orderSide;
         this.category = category;
+        this.account_id = account_id;
     }
 
 
     public Order CreateChildOrder(BigDecimal quantity, BigDecimal price) {
-        Order order = new Order(OrderType.LimitOrder, this.security, price, quantity, this.orderSide, this.parentOrderID);
+        Order order = new Order(OrderType.LimitOrder, this.security, price, quantity, this.orderSide, this.parentOrderID, this.account_id);
         return order;
     }
 
@@ -168,5 +172,9 @@ public class Order {
 
     public void setState(OrderState newState) {
         this.state = newState;
+    }
+
+    public int getAccount() {
+        return this.account_id;
     }
 }

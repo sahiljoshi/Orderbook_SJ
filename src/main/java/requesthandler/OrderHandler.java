@@ -11,6 +11,7 @@ import orderbook.security.Security;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 public class OrderHandler {
 
     private final ConcurrentMap<String, OrderBook> SecurityOrderBook;
+    QueueManager queueManager;
     private final ArrayList<Security> securities;
     private final DbHandler dbHandler;
 

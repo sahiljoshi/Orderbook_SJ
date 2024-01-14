@@ -16,6 +16,7 @@ import java.util.Map;
 Order book is developed per order and supposed run in syncronized manner.
 */
 public class OrderBook {
+
     private final Security security;
     private OrderSideBook bidBook;
     private OrderSideBook askBook;
@@ -23,12 +24,15 @@ public class OrderBook {
     private ArrayList<Trade> lastTrades;  // useful if we want to keep responsibility of trade publishing to order book.
 
 
+    private final String queueName;
+
     /// how to make it thread safe ?
 
     public OrderBook(Security security) {
         this.security = security;
         this.bidBook = new OrderSideBook();
         this.askBook = new OrderSideBook();
+        this.queueName = "orderbook." + security.getMarketPair();
     }
 
 
@@ -252,5 +256,9 @@ public class OrderBook {
             return this.askBook.getOrderDetails(o);
         }
 
+    }
+
+    public String getQueueName() {
+        return queueName;
     }
 }

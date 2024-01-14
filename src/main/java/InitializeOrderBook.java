@@ -63,12 +63,12 @@ public class InitializeOrderBook {
         OrderHandler oh = new OrderHandler(securities, dbHandler);
         BigDecimal price = new BigDecimal("100.23");
         BigDecimal qty = new BigDecimal("5.679");
-        Order buyOrder = new Order(securities.get(0), OrderType.LimitOrder, price, qty, OrderSide.BuySide, OrderState.OPEN, OrderCategory.Normal);
+        Order buyOrder = new Order(securities.get(0), OrderType.LimitOrder, price, qty, OrderSide.BuySide, OrderState.OPEN, OrderCategory.Normal, 1);
         oh.AddOrder(buyOrder);
 
         price = new BigDecimal("100.25");
         qty = new BigDecimal("5.679");
-        Order sellOrder = new Order(securities.get(0), OrderType.LimitOrder, price, qty, OrderSide.SellSide, OrderState.OPEN, OrderCategory.Normal);
+        Order sellOrder = new Order(securities.get(0), OrderType.LimitOrder, price, qty, OrderSide.SellSide, OrderState.OPEN, OrderCategory.Normal, 2);
         oh.AddOrder(sellOrder);
 
 
@@ -99,21 +99,21 @@ public class InitializeOrderBook {
 
         price = new BigDecimal("101.25");
         qty = new BigDecimal("5.679");
-        Order sellOrder4 = new Order(securities.get(0), OrderType.LimitOrder, price, qty, OrderSide.SellSide, OrderState.OPEN, OrderCategory.Normal);
+        Order sellOrder4 = new Order(securities.get(0), OrderType.LimitOrder, price, qty, OrderSide.SellSide, OrderState.OPEN, OrderCategory.Normal, 2);
         oh.AddOrder(sellOrder4);
 
 
         qty = new BigDecimal("6.679");
-        Order buyOrder4 = new Order(securities.get(0), OrderType.MarketOrder, null, qty, OrderSide.BuySide, OrderState.OPEN, OrderCategory.Normal);
+        Order buyOrder4 = new Order(securities.get(0), OrderType.MarketOrder, null, qty, OrderSide.BuySide, OrderState.OPEN, OrderCategory.Normal, 1);
         oh.AddOrder(buyOrder4);
 
 
         qty = new BigDecimal("2.679");
-        Order sellOrdeR5 = new Order(securities.get(0), OrderType.MarketOrder, null, qty, OrderSide.SellSide, OrderState.OPEN, OrderCategory.Normal);
+        Order sellOrdeR5 = new Order(securities.get(0), OrderType.MarketOrder, null, qty, OrderSide.SellSide, OrderState.OPEN, OrderCategory.Normal, 2);
         oh.AddOrder(sellOrdeR5);
 
         qty = new BigDecimal("6.679");
-        Order sellOrdeR6 = new Order(securities.get(0), OrderType.MarketOrder, null, qty, OrderSide.SellSide, OrderState.OPEN, OrderCategory.Normal);
+        Order sellOrdeR6 = new Order(securities.get(0), OrderType.MarketOrder, null, qty, OrderSide.SellSide, OrderState.OPEN, OrderCategory.Normal, 2);
         oh.AddOrder(sellOrdeR6);
 
         Map m = oh.GetOrderBookDetails(securities.get(0));
